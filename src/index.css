@@ -1,0 +1,453 @@
+:root {
+  --color-jungle-dark: #0a1f0a;
+  --color-jungle-green: #2d5a27;
+  --color-sunset-orange: #ff8c00;
+  /* Updated to correct Orange */
+  --color-teal: #008080;
+  /* Kalo Teal */
+  --color-vatu: #9b30ff;
+  /* Vatu Purple */
+  --color-sand: #d2b48c;
+  --color-wood-light: #5d4037;
+  --color-wood-dark: #3e2723;
+  --color-text: #f5f5f5;
+  --color-cila: var(--color-sunset-orange);
+  --color-kalo: var(--color-teal);
+
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  color: var(--color-text);
+  background-color: var(--color-jungle-dark);
+
+  /* Responsive Typography Base */
+  --font-size-base: clamp(0.9rem, 1vw + 0.5rem, 1.1rem);
+  --font-size-lg: clamp(1.1rem, 1.5vw + 0.5rem, 1.4rem);
+  --font-size-xl: clamp(1.8rem, 4vw + 1rem, 3rem);
+  font-size: var(--font-size-base);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--color-jungle-dark) 0%, #1a1a1a 100%);
+  background-attachment: fixed;
+}
+
+#root {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.app-header {
+  padding: 2rem;
+  text-align: center;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.app-logo {
+  max-height: clamp(100px, 20vh, 200px);
+  width: auto;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.app-logo:hover {
+  transform: scale(1.05) rotate(1deg);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+/* Profile-Centric Player Card */
+.player-card {
+  position: relative;
+  height: clamp(320px, 50vh, 400px);
+  border-radius: 16px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center var(--focal-point, 15%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 4px solid var(--tribe-color, var(--color-sand));
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.player-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+}
+
+.player-card.voted-out {
+  filter: grayscale(1) contrast(0.8);
+  opacity: 0.7;
+}
+
+.player-card.voted-out::after {
+  content: 'VOTED OUT';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-size: 3rem;
+  font-weight: 900;
+  color: rgba(255, 0, 0, 0.6);
+  pointer-events: none;
+  border: 8px solid rgba(255, 0, 0, 0.6);
+  padding: 10px;
+}
+
+/* Glassmorphism Overlay */
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: white;
+}
+
+.player-name {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.player-meta {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 5px;
+}
+
+/* Advantage Indicators */
+.advantage-icons {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.icon-tag {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-tag.idol {
+  border: 1px solid #ffd700;
+  color: #ffd700;
+}
+
+.icon-tag.beware {
+  border: 1px solid #ff4500;
+  color: #ff4500;
+}
+
+/* Tribe Filters */
+.tribe-filters {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  padding: 0 1rem;
+}
+
+.filter-btn {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid transparent;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 800;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  font-size: 0.8rem;
+}
+
+.filter-btn.active.cila {
+  border-color: var(--color-cila);
+  color: var(--color-cila);
+}
+
+.filter-btn.active.kalo {
+  border-color: var(--color-kalo);
+  color: var(--color-kalo);
+}
+
+.filter-btn.active.vatu {
+  border-color: var(--color-vatu);
+  color: var(--color-vatu);
+}
+
+/* Management Controls */
+.management-controls {
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.challenge-panel {
+  flex: 2;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 300px;
+}
+
+.challenge-panel h3 {
+  margin-top: 0;
+  color: var(--color-sunset-orange);
+  text-transform: uppercase;
+  font-size: 1rem;
+}
+
+.challenge-controls {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.challenge-controls select {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #444;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.winner-selection label,
+.second-selection label {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.btn-log {
+  background: #ff4500;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-log:hover {
+  transform: scale(1.05);
+  background: #ff6347;
+}
+
+.challenge-history {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1rem;
+}
+
+.challenge-history h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
+  opacity: 0.5;
+  text-transform: uppercase;
+}
+
+.challenge-history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.challenge-history li {
+  font-size: 0.85rem;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tribe-mgr-toggle {
+  background: var(--color-wood-light);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  height: fit-content;
+}
+
+.tribe-manager {
+  background: var(--color-wood-dark);
+  margin: 0 2rem 2rem 2rem;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--color-sand);
+}
+
+.tribe-edit-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tribe-edit-row input[type="text"] {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: white;
+  padding: 8px;
+  flex: 1;
+}
+
+.add-tribe {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 10px;
+}
+
+/* Win Badges on Cards */
+.win-badges {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 10;
+}
+
+.win-badge {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.win-badge.immunity {
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+.win-badge.reward {
+  border-color: #00f2fe;
+  color: #00f2fe;
+}
+
+/* Modal Responsive Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--color-wood-dark);
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 20px;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--color-sand);
+  overflow-y: auto;
+  position: relative;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: var(--color-sand);
+}
+
+.btn-primary {
+  background: var(--color-sunset-orange);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .management-controls {
+    flex-direction: column;
+    padding: 0 1rem;
+  }
+
+  .challenge-panel {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tribe-mgr-toggle {
+    width: 100%;
+  }
+
+  .tribe-manager {
+    margin: 0 1rem 2rem 1rem;
+    padding: 1rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .win-badges {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
