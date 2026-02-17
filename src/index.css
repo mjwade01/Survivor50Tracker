@@ -203,6 +203,39 @@ body {
   align-items: flex-start;
 }
 
+.persistence-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.btn-persist {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.btn-persist:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-persist.reset {
+  color: #ff4444;
+  border-color: rgba(255, 68, 68, 0.3);
+}
+
+.btn-persist.reset:hover {
+  background: rgba(255, 68, 68, 0.1);
+}
+
 .challenge-panel {
   flex: 2;
   background: rgba(0, 0, 0, 0.4);
@@ -358,6 +391,11 @@ body {
   color: #00f2fe;
 }
 
+.win-badge.votes {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
 /* Modal Responsive Styles */
 .modal-overlay {
   position: fixed;
@@ -450,4 +488,23 @@ body {
     top: 0.5rem;
     right: 0.5rem;
   }
+}
+
+.adventure-history::-webkit-scrollbar,
+.vote-inputs::-webkit-scrollbar {
+  width: 6px;
+}
+
+.adventure-history::-webkit-scrollbar-thumb,
+.vote-inputs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.tribal-panel {
+  flex: 1;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
 }

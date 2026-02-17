@@ -3,17 +3,44 @@ import { players as initialPlayers } from './data/players'
 
 function App() {
   const [filter, setFilter] = useState('All');
-  const [playerList, setPlayerList] = useState(initialPlayers);
+  // Persistence Helper
+  const saveToStats = (key, data) => {
+    localStorage.setItem(`survivor_50_${key}`, JSON.stringify(data));
+  };
+
+  const [playerList, setPlayerList] = useState(() => {
+    const saved = localStorage.getItem('survivor_50_players');
+    return saved ? JSON.parse(saved) : initialPlayers;
+  });
+
+  const [tribes, setTribes] = useState(() => {
+    const saved = localStorage.getItem('survivor_50_tribes');
+    return saved ? JSON.parse(saved) : [
+      { name: 'Cila', color: '#ff8c00' },
+      { name: 'Kalo', color: '#008080' },
+      { name: 'Vatu', color: '#9b30ff' }
+    ];
+  });
+
+  const [challengeLog, setChallengeLog] = useState(() => {
+    const saved = localStorage.getItem('survivor_50_log');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    saveToStats('players', playerList);
+  }, [playerList]);
+
+  useEffect(() => {
+    saveToStats('tribes', tribes);
+  }, [tribes]);
+
+  useEffect(() => {
+    saveToStats('log', challengeLog);
+  }, [challengeLog]);
+
   const [selectedPlayer, setSelectedPlayer] = useState(null); // For the edit modal
   const [showTribeManager, setShowTribeManager] = useState(false);
-
-  const [tribes, setTribes] = useState([
-    { name: 'Cila', color: '#ff8c00' },
-    { name: 'Kalo', color: '#008080' },
-    { name: 'Vatu', color: '#9b30ff' }
-  ]);
-
-  const [challengeLog, setChallengeLog] = useState([]);
 
   const filteredPlayers = filter === 'All'
     ? playerList
@@ -55,6 +82,34 @@ function App() {
     if (filter === oldName) setFilter(newTribeData.name);
   };
 
+  const exportData = () => {
+    const data = { playerList, tribes, challengeLog };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `survivor_50_backup_${new Date().toLocaleDateString()}.json`;
+    a.click();
+  };
+
+  const importData = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (data.playerList) setPlayerList(data.playerList);
+        if (data.tribes) setTribes(data.tribes);
+        if (data.challengeLog) setChallengeLog(data.challengeLog);
+        alert('Data imported successfully!');
+      } catch (err) {
+        alert('Error importing data. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="container">
       <header className="app-header">
@@ -67,7 +122,16 @@ function App() {
 
       <main>
         <div className="management-controls">
+          <div className="persistence-controls">
+            <button className="btn-persist" onClick={exportData}>Export Data</button>
+            <label className="btn-persist import-label">
+              Import Data
+              <input type="file" onChange={importData} style={{ display: 'none' }} accept=".json" />
+            </label>
+            <button className="btn-persist reset" onClick={() => { if (confirm('Reset all data?')) { localStorage.clear(); window.location.reload(); } }}>Reset</button>
+          </div>
           <ChallengePanel tribes={tribes} onLog={logChallengeResult} history={challengeLog} />
+          <TribalCouncil tribes={tribes} players={playerList} onVotes={setPlayerList} />
           <button className="tribe-mgr-toggle" onClick={() => setShowTribeManager(!showTribeManager)}>
             {showTribeManager ? 'Close Tribe Manager' : 'Open Tribe Manager'}
           </button>
@@ -115,6 +179,7 @@ function App() {
                   <div className="win-badges">
                     {player.wins.immunity > 0 && <span className="win-badge immunity" title="Immunity Wins">🛡️ {player.wins.immunity}</span>}
                     {player.wins.reward > 0 && <span className="win-badge reward" title="Reward Wins">🏆 {player.wins.reward}</span>}
+                    {player.totalVotes > 0 && <span className="win-badge votes" title="Votes Received">💀 {player.totalVotes}</span>}
                   </div>
 
                   <div className="player-name">{player.name.split(' ')[0]}</div>
@@ -286,6 +351,36 @@ function EditPlayerModal({ player, onClose, onSave }) {
   const [editedPlayer, setEditedPlayer] = useState({ ...player });
   const [newAdvantage, setNewAdvantage] = useState({ name: '', type: 'Idol' });
   const [newAlliance, setNewAlliance] = useState('');
+  const [newAdventure, setNewAdventure] = useState({ description: '', outcome: 'None' });
+  const [autoAddAdvantage, setAutoAddAdvantage] = useState(false);
+
+  const addAdventure = () => {
+    if (!newAdventure.description) return;
+    const adventure = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString(),
+      description: newAdventure.description,
+      outcome: newAdventure.outcome
+    };
+
+    let updatedAdvantages = [...editedPlayer.advantages];
+    if (autoAddAdvantage) {
+      updatedAdvantages.push({
+        id: Date.now() + 1,
+        name: newAdventure.outcome,
+        type: newAdventure.outcome.includes('Idol') ? 'Idol' : 'Extra Vote',
+        status: 'Active'
+      });
+    }
+
+    setEditedPlayer({
+      ...editedPlayer,
+      adventures: [adventure, ...editedPlayer.adventures],
+      advantages: updatedAdvantages
+    });
+    setNewAdventure({ description: '', outcome: 'None' });
+    setAutoAddAdvantage(false);
+  };
 
   const addAdvantage = () => {
     if (!newAdvantage.name) return;
@@ -381,6 +476,43 @@ function EditPlayerModal({ player, onClose, onSave }) {
         </div>
 
         <div className="form-section">
+          <label className="form-label">Adventures</label>
+          <div style={{ background: '#1a1a1a', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
+            <textarea
+              value={newAdventure.description}
+              onChange={e => setNewAdventure({ ...newAdventure, description: e.target.value })}
+              placeholder="What happened on the adventure?"
+              style={{ width: '100%', background: '#000', color: 'white', border: '1px solid #444', padding: '10px', marginBottom: '10px', borderRadius: '4px', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <select
+                value={newAdventure.outcome}
+                onChange={e => setNewAdventure({ ...newAdventure, outcome: e.target.value })}
+                style={{ background: '#000', color: 'white', border: '1px solid #444', padding: '8px' }}
+              >
+                <option value="None">No Advantage</option>
+                <option value="Extra Vote">Earned Extra Vote</option>
+                <option value="Hidden Immunity Idol">Earned Idol</option>
+                <option value="Lost Vote">Lost Vote</option>
+              </select>
+              <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <input type="checkbox" checked={autoAddAdvantage} onChange={e => setAutoAddAdvantage(e.target.checked)} />
+                Auto-add Advantage?
+              </label>
+              <button onClick={addAdventure} className="btn-primary" style={{ padding: '8px 15px' }}>LOG ADVENTURES</button>
+            </div>
+          </div>
+          <div className="adventure-history" style={{ maxHeight: '150px', overflowY: 'auto' }}>
+            {editedPlayer.adventures.map(adv => (
+              <div key={adv.id} style={{ fontSize: '0.85rem', padding: '10px', borderBottom: '1px solid #333' }}>
+                <span style={{ color: 'var(--color-sand)' }}>{adv.date}:</span> {adv.description}
+                <span style={{ color: '#ff8c00', marginLeft: '10px' }}>Result: {adv.outcome}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-section">
           <label className="form-label">Advantages & Idols</label>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
             <input
@@ -435,6 +567,54 @@ function EditPlayerModal({ player, onClose, onSave }) {
           <button onClick={onClose} style={{ flex: 1, background: '#444', border: 'none', color: 'white', borderRadius: '8px', cursor: 'pointer' }}>CANCEL</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function TribalCouncil({ tribes, players, onVotes }) {
+  const [selectedTribe, setSelectedTribe] = useState(tribes[0]?.name || '');
+  const [voteCasting, setVoteCasting] = useState({}); // { playerId: voteCount }
+
+  const handleVoteChange = (id, val) => {
+    setVoteCasting(prev => ({ ...prev, [id]: Math.max(0, parseInt(val) || 0) }));
+  };
+
+  const submitVotes = () => {
+    onVotes(prev => prev.map(p => ({
+      ...p,
+      totalVotes: p.totalVotes + (voteCasting[p.id] || 0)
+    })));
+    setVoteCasting({});
+    alert('Votes recorded!');
+  };
+
+  const tribePlayers = players.filter(p => p.tribe === selectedTribe && p.status === 'Active');
+
+  return (
+    <div className="challenge-panel tribal-panel">
+      <h3>Record Tribal Council</h3>
+      <div className="tribe-select" style={{ marginBottom: '15px' }}>
+        <label style={{ fontSize: '0.7rem', display: 'block', opacity: 0.7 }}>Select Tribe at Tribal:</label>
+        <select value={selectedTribe} onChange={e => setSelectedTribe(e.target.value)} style={{ width: '100%', background: '#1a1a1a', color: 'white', border: '1px solid #444', padding: '8px' }}>
+          {tribes.map(t => <option key={t.name} value={t.name}>{t.name}</option>)}
+        </select>
+      </div>
+      <div className="vote-inputs" style={{ maxHeight: '150px', overflowY: 'auto', marginBottom: '15px' }}>
+        {tribePlayers.map(p => (
+          <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid #222' }}>
+            <span style={{ fontSize: '0.9rem' }}>{p.name}</span>
+            <input
+              type="number"
+              min="0"
+              value={voteCasting[p.id] || ''}
+              onChange={e => handleVoteChange(p.id, e.target.value)}
+              placeholder="0"
+              style={{ width: '50px', background: '#000', color: 'white', border: '1px solid #444', textAlign: 'center' }}
+            />
+          </div>
+        ))}
+      </div>
+      <button onClick={submitVotes} className="btn-log" style={{ width: '100%' }}>SUBMIT TRIBAL VOTES</button>
     </div>
   );
 }
