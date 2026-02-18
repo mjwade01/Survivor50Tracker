@@ -122,16 +122,6 @@ function App() {
 
       <main>
         <div className="management-controls">
-          <div className="persistence-controls">
-            <button className="btn-persist" onClick={exportData}>Export Data</button>
-            <label className="btn-persist import-label">
-              Import Data
-              <input type="file" onChange={importData} style={{ display: 'none' }} accept=".json" />
-            </label>
-            <button className="btn-persist reset" onClick={() => { if (confirm('Reset all data?')) { localStorage.clear(); window.location.reload(); } }}>Reset</button>
-          </div>
-          <ChallengePanel tribes={tribes} onLog={logChallengeResult} history={challengeLog} />
-          <TribalCouncil tribes={tribes} players={playerList} onVotes={setPlayerList} />
           <button className="tribe-mgr-toggle" onClick={() => setShowTribeManager(!showTribeManager)}>
             {showTribeManager ? 'Close Tribe Manager' : 'Open Tribe Manager'}
           </button>
@@ -220,6 +210,17 @@ function App() {
           })}
         </div>
 
+        <div className="management-controls persistence-partition">
+          <div className="persistence-controls">
+            <button className="btn-persist" onClick={exportData}>Export Data</button>
+            <label className="btn-persist import-label">
+              Import Data
+              <input type="file" onChange={importData} style={{ display: 'none' }} accept=".json" />
+            </label>
+            <button className="btn-persist reset" onClick={() => { if (confirm('Reset all data?')) { localStorage.clear(); window.location.reload(); } }}>Reset</button>
+          </div>
+        </div>
+
         <section className="twist-tracker">
           <h2 style={{ textAlign: 'center', color: '#ff8c00', textTransform: 'uppercase', marginBottom: '2rem' }}>Twists & Global Advantages</h2>
           <div className="twists-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -241,6 +242,11 @@ function App() {
             </div>
           </div>
         </section>
+
+        <div className="management-controls game-actions-bottom">
+          <ChallengePanel tribes={tribes} onLog={logChallengeResult} history={challengeLog} />
+          <TribalCouncil tribes={tribes} players={playerList} onVotes={setPlayerList} />
+        </div>
       </main>
 
       {/* Edit Modal */}

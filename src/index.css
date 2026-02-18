@@ -203,6 +203,26 @@ body {
   align-items: flex-start;
 }
 
+.persistence-partition {
+  justify-content: center;
+  margin-top: 4rem;
+  margin-bottom: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 2rem;
+}
+
+.persistence-partition .persistence-controls {
+  flex-direction: row;
+  align-items: center;
+}
+
+.game-actions-bottom {
+  margin-top: 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 3rem;
+  justify-content: center;
+}
+
 .persistence-controls {
   display: flex;
   flex-direction: column;
