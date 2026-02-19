@@ -1,54 +1,120 @@
+/* ==========================================================================
+   Survivor 50 Tracker — Deep Jungle Dark Mode + Torch Amber Theme
+   ========================================================================== */
+
 :root {
-  --color-jungle-dark: #0a1f0a;
-  --color-jungle-green: #2d5a27;
+  /* Core Palette */
+  --color-bg-deep: #0F172A;
+  --color-bg-surface: #1E293B;
+  --color-bg-card: rgba(15, 23, 42, 0.6);
+  --color-torch-amber: #F59E0B;
+  --color-torch-amber-glow: rgba(245, 158, 11, 0.25);
+  --color-torch-light: #FBBF24;
+  --color-torch-dark: #D97706;
+
+  /* Tribe Colors */
   --color-sunset-orange: #ff8c00;
-  /* Updated to correct Orange */
   --color-teal: #008080;
-  /* Kalo Teal */
   --color-vatu: #9b30ff;
-  /* Vatu Purple */
   --color-sand: #d2b48c;
-  --color-wood-light: #5d4037;
-  --color-wood-dark: #3e2723;
-  --color-text: #f5f5f5;
+  --color-wood-light: #334155;
+  --color-wood-dark: #1E293B;
+  --color-text: #F1F5F9;
+  --color-text-muted: #94A3B8;
   --color-cila: var(--color-sunset-orange);
   --color-kalo: var(--color-teal);
 
+  /* Glassmorphism */
+  --glass-bg: rgba(15, 23, 42, 0.55);
+  --glass-border: rgba(245, 158, 11, 0.15);
+  --glass-blur: 16px;
+
+  /* Typography */
   font-family: 'Outfit', 'Inter', system-ui, sans-serif;
   color: var(--color-text);
-  background-color: var(--color-jungle-dark);
+  background-color: var(--color-bg-deep);
 
-  /* Responsive Typography Base */
   --font-size-base: clamp(0.9rem, 1vw + 0.5rem, 1.1rem);
   --font-size-lg: clamp(1.1rem, 1.5vw + 0.5rem, 1.4rem);
   --font-size-xl: clamp(1.8rem, 4vw + 1rem, 3rem);
   font-size: var(--font-size-base);
 }
 
+/* Global Reset & Background */
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-jungle-dark) 0%, #1a1a1a 100%);
+  background: linear-gradient(160deg, #0F172A 0%, #0B1120 40%, #162033 100%);
   background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(139, 92, 246, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 #root {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
+/* ==========================================================================
+   HEADER & HERO
+   ========================================================================== */
 .app-header {
-  padding: 2rem;
+  padding: 2.5rem 2rem 1.5rem;
   text-align: center;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
+}
+
+.hero-title {
+  font-family: 'Rye', serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  color: var(--color-torch-amber);
+  text-shadow:
+    0 0 40px rgba(245, 158, 11, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+  margin: 0 0 0.5rem;
+  letter-spacing: 2px;
+  animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+  from {
+    text-shadow: 0 0 30px rgba(245, 158, 11, 0.2), 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  to {
+    text-shadow: 0 0 60px rgba(245, 158, 11, 0.4), 0 4px 8px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.hero-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin: 0 0 1.5rem;
+  font-weight: 600;
 }
 
 .app-logo {
   max-height: clamp(100px, 20vh, 200px);
   width: auto;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 8px 24px rgba(245, 158, 11, 0.2));
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -56,106 +122,111 @@ body {
   transform: scale(1.05) rotate(1deg);
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: clamp(1rem, 3vw, 2rem);
-  padding: clamp(1rem, 3vw, 2rem);
+/* ==========================================================================
+   COUNTDOWN TIMER
+   ========================================================================== */
+.countdown-section {
+  text-align: center;
+  margin: 1.5rem auto 2rem;
+  max-width: 600px;
 }
 
-/* Profile-Centric Player Card */
-.player-card {
-  position: relative;
-  height: clamp(320px, 50vh, 400px);
-  border-radius: 16px;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center var(--focal-point, 15%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 4px solid var(--tribe-color, var(--color-sand));
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+.countdown-label {
+  font-family: 'Rye', serif;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  color: var(--color-torch-amber);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin-bottom: 1rem;
+  opacity: 0.9;
 }
 
-.player-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-}
-
-.player-card.voted-out {
-  filter: grayscale(1) contrast(0.8);
-  opacity: 0.7;
-}
-
-.player-card.voted-out::after {
-  content: 'VOTED OUT';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-45deg);
-  font-size: 3rem;
-  font-weight: 900;
-  color: rgba(255, 0, 0, 0.6);
-  pointer-events: none;
-  border: 8px solid rgba(255, 0, 0, 0.6);
-  padding: 10px;
-}
-
-/* Glassmorphism Overlay */
-.card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  color: white;
-}
-
-.player-name {
-  font-size: var(--font-size-lg);
-  font-weight: 800;
-  margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.player-meta {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-top: 5px;
-}
-
-/* Advantage Indicators */
-.advantage-icons {
+.countdown-timer {
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
+  justify-content: center;
+  gap: clamp(0.5rem, 2vw, 1.5rem);
 }
 
-.icon-tag {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.7rem;
+.countdown-unit {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: clamp(0.6rem, 2vw, 1rem) clamp(0.8rem, 2.5vw, 1.5rem);
+  min-width: clamp(55px, 10vw, 80px);
+  transition: transform 0.3s ease;
+}
+
+.countdown-unit:hover {
+  transform: translateY(-2px);
+}
+
+.countdown-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 900;
+  color: var(--color-torch-light);
+  line-height: 1;
+  display: block;
+}
+
+.countdown-unit-label {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ==========================================================================
+   ERA FILTER BAR
+   ========================================================================== */
+.era-filters {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  padding: 0 1rem;
+}
+
+.era-btn {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
   font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  gap: 4px;
 }
 
-.icon-tag.idol {
-  border: 1px solid #ffd700;
-  color: #ffd700;
+.era-btn:hover {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--color-torch-light);
 }
 
-.icon-tag.beware {
-  border: 1px solid #ff4500;
-  color: #ff4500;
+.era-btn.active {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: var(--color-torch-amber);
+  color: var(--color-torch-amber);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
 }
 
-/* Tribe Filters */
+/* ==========================================================================
+   TRIBE FILTERS
+   ========================================================================== */
 .tribe-filters {
   display: flex;
   justify-content: center;
@@ -168,7 +239,7 @@ body {
 .filter-btn {
   background: rgba(0, 0, 0, 0.3);
   border: 2px solid transparent;
-  color: white;
+  color: var(--color-text-muted);
   padding: 0.6rem 1.2rem;
   border-radius: 50px;
   cursor: pointer;
@@ -176,6 +247,17 @@ body {
   text-transform: uppercase;
   transition: all 0.3s;
   font-size: 0.8rem;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.filter-btn.active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .filter-btn.active.cila {
@@ -193,191 +275,192 @@ body {
   color: var(--color-vatu);
 }
 
-/* Management Controls */
-.management-controls {
+/* ==========================================================================
+   PLAYER CARD GRID
+   ========================================================================== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+/* Glassmorphism Player Card */
+.player-card {
+  position: relative;
+  height: clamp(320px, 50vh, 400px);
+  border-radius: 16px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center var(--focal-point, 15%);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--glass-border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.player-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  border: 4px solid var(--tribe-color, var(--color-sand));
+  pointer-events: none;
+  z-index: 5;
+}
+
+.player-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.7),
+    0 0 30px var(--color-torch-amber-glow);
+}
+
+.player-card.voted-out {
+  filter: grayscale(1) contrast(0.8);
+  opacity: 0.6;
+}
+
+.player-card.voted-out::after {
+  content: 'VOTED OUT';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-family: 'Rye', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: rgba(255, 0, 0, 0.6);
+  pointer-events: none;
+  border: 6px solid rgba(255, 0, 0, 0.5);
+  padding: 8px 16px;
+  z-index: 20;
+}
+
+/* Card Overlay — compact gradient, no blur over face */
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.75) 40%, rgba(15, 23, 42, 0.3) 70%, transparent 100%);
+  color: white;
+}
+
+.player-name {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.player-meta {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* Season & Days Badges on Cards */
+.metadata-badges {
   display: flex;
-  gap: 2rem;
-  padding: 0 2rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  gap: 6px;
+  margin-top: 6px;
 }
 
-.persistence-partition {
-  justify-content: center;
-  margin-top: 4rem;
-  margin-bottom: 3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 2rem;
+.meta-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--color-torch-light);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
-.persistence-partition .persistence-controls {
-  flex-direction: row;
-  align-items: center;
+.meta-badge.era-badge {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #A78BFA;
 }
 
-.game-actions-bottom {
-  margin-top: 4rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 3rem;
-  justify-content: center;
-}
-
-.persistence-controls {
+/* ==========================================================================
+   HYPE METER
+   ========================================================================== */
+.hype-meter {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-width: 150px;
+  align-items: center;
+  gap: 4px;
 }
 
-.btn-persist {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
+.hype-btn {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--color-torch-amber);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.hype-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.hype-btn:active {
+  transform: scale(0.95);
+}
+
+.hype-btn.hyped {
+  animation: hypeFlare 0.4s ease;
+}
+
+@keyframes hypeFlare {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hype-count {
   font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.btn-persist:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-persist.reset {
-  color: #ff4444;
-  border-color: rgba(255, 68, 68, 0.3);
-}
-
-.btn-persist.reset:hover {
-  background: rgba(255, 68, 68, 0.1);
-}
-
-.challenge-panel {
-  flex: 2;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 1.5rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  min-width: 300px;
-}
-
-.challenge-panel h3 {
-  margin-top: 0;
-  color: var(--color-sunset-orange);
-  text-transform: uppercase;
-  font-size: 1rem;
-}
-
-.challenge-controls {
-  display: flex;
-  gap: 15px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.challenge-controls select {
-  background: #1a1a1a;
-  color: white;
-  border: 1px solid #444;
-  padding: 8px;
-  border-radius: 6px;
-}
-
-.winner-selection label,
-.second-selection label {
-  display: block;
-  font-size: 0.7rem;
-  opacity: 0.7;
-  margin-bottom: 4px;
-}
-
-.btn-log {
-  background: #ff4500;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
   font-weight: 800;
-  cursor: pointer;
-  transition: transform 0.2s;
+  color: var(--color-torch-amber);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 8px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-.btn-log:hover {
-  transform: scale(1.05);
-  background: #ff6347;
-}
-
-.challenge-history {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 1rem;
-}
-
-.challenge-history h4 {
-  margin: 0 0 10px 0;
-  font-size: 0.8rem;
-  opacity: 0.5;
-  text-transform: uppercase;
-}
-
-.challenge-history ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.challenge-history li {
-  font-size: 0.85rem;
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.tribe-mgr-toggle {
-  background: var(--color-wood-light);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 700;
-  height: fit-content;
-}
-
-.tribe-manager {
-  background: var(--color-wood-dark);
-  margin: 0 2rem 2rem 2rem;
-  padding: 2rem;
-  border-radius: 16px;
-  border: 1px solid var(--color-sand);
-}
-
-.tribe-edit-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.tribe-edit-row input[type="text"] {
-  background: #1a1a1a;
-  border: 1px solid #444;
-  color: white;
-  padding: 8px;
-  flex: 1;
-}
-
-.add-tribe {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  display: flex;
-  gap: 10px;
-}
-
-/* Win Badges on Cards */
+/* ==========================================================================
+   WIN BADGES (top-right)
+   ========================================================================== */
 .win-badges {
   position: absolute;
   top: 1rem;
@@ -391,6 +474,7 @@ body {
 .win-badge {
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   padding: 4px 8px;
   border-radius: 8px;
   font-size: 0.8rem;
@@ -416,7 +500,324 @@ body {
   color: #ff4444;
 }
 
-/* Modal Responsive Styles */
+/* ==========================================================================
+   ADVANTAGE ICONS
+   ========================================================================== */
+.advantage-icons {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.icon-tag {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-tag.idol {
+  border: 1px solid #ffd700;
+  color: #ffd700;
+}
+
+.icon-tag.beware {
+  border: 1px solid #ff4500;
+  color: #ff4500;
+}
+
+/* Status Container */
+.status-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.player-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.voted-out-tag {
+  color: #EF4444;
+}
+
+.status-toggle {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+  padding: 4px;
+}
+
+.status-toggle:hover {
+  transform: scale(1.2);
+}
+
+/* ==========================================================================
+   MANAGEMENT CONTROLS
+   ========================================================================== */
+.management-controls {
+  display: flex;
+  gap: 2rem;
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.persistence-partition {
+  justify-content: center;
+  margin-top: 4rem;
+  margin-bottom: 3rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 2rem;
+}
+
+.persistence-partition .persistence-controls {
+  flex-direction: row;
+  align-items: center;
+}
+
+.game-actions-bottom {
+  margin-top: 4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 3rem;
+  justify-content: center;
+}
+
+.persistence-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.btn-persist {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.btn-persist:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.btn-persist.reset {
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.btn-persist.reset:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* ==========================================================================
+   CHALLENGE PANEL
+   ========================================================================== */
+.challenge-panel {
+  flex: 2;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  min-width: 300px;
+}
+
+.challenge-panel h3 {
+  margin-top: 0;
+  color: var(--color-torch-amber);
+  text-transform: uppercase;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.challenge-controls {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.challenge-controls select {
+  background: var(--color-bg-deep);
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.winner-selection label,
+.second-selection label {
+  display: block;
+  font-size: 0.7rem;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.btn-log {
+  background: linear-gradient(135deg, var(--color-torch-amber), var(--color-torch-dark));
+  color: var(--color-bg-deep);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-log:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+}
+
+.challenge-history {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1rem;
+}
+
+.challenge-history h4 {
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.challenge-history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.challenge-history li {
+  font-size: 0.85rem;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   TRIBE MANAGER
+   ========================================================================== */
+.tribe-mgr-toggle {
+  background: linear-gradient(135deg, var(--color-wood-light), var(--color-bg-surface));
+  color: var(--color-text);
+  border: 1px solid var(--glass-border);
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  height: fit-content;
+  transition: all 0.3s;
+}
+
+.tribe-mgr-toggle:hover {
+  border-color: var(--color-torch-amber);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+}
+
+.tribe-manager {
+  background: var(--color-bg-surface);
+  margin: 0 2rem 2rem 2rem;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+}
+
+.tribe-edit-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tribe-edit-row input[type="text"] {
+  background: var(--color-bg-deep);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text);
+  padding: 8px;
+  flex: 1;
+  border-radius: 6px;
+}
+
+.add-tribe {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   TWIST TRACKER
+   ========================================================================== */
+.twist-tracker {
+  margin: 0 2rem;
+}
+
+.twist-tracker h2 {
+  font-family: 'Rye', serif;
+  color: var(--color-torch-amber);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+}
+
+.twist-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.3s, border-color 0.3s;
+}
+
+.twist-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.twist-card h3 {
+  color: var(--color-torch-amber);
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.twist-card p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   MODAL
+   ========================================================================== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -424,7 +825,8 @@ body {
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -433,13 +835,13 @@ body {
 }
 
 .modal-content {
-  background: var(--color-wood-dark);
+  background: var(--color-bg-surface);
   width: 100%;
   max-width: 800px;
   max-height: 90vh;
   border-radius: 20px;
   padding: clamp(1.5rem, 4vw, 2.5rem);
-  border: 1px solid var(--color-sand);
+  border: 1px solid var(--glass-border);
   overflow-y: auto;
   position: relative;
 }
@@ -456,23 +858,64 @@ body {
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 10px;
-  color: var(--color-sand);
+  color: var(--color-torch-amber);
 }
 
 .btn-primary {
-  background: var(--color-sunset-orange);
-  color: white;
+  background: linear-gradient(135deg, var(--color-torch-amber), var(--color-torch-dark));
+  color: var(--color-bg-deep);
   border: none;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 800;
   cursor: pointer;
   text-transform: uppercase;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.btn-primary:hover {
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.tribal-panel {
+  flex: 1;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+footer {
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   SCROLLBAR
+   ========================================================================== */
+.adventure-history::-webkit-scrollbar,
+.vote-inputs::-webkit-scrollbar {
+  width: 6px;
+}
+
+.adventure-history::-webkit-scrollbar-thumb,
+.vote-inputs::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.15);
+  border-radius: 10px;
+}
+
+/* ==========================================================================
+   RESPONSIVE — MOBILE
+   ========================================================================== */
 @media (max-width: 768px) {
   .app-header {
-    padding: 1rem;
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
   }
 
   .dashboard-grid {
@@ -493,6 +936,7 @@ body {
 
   .tribe-mgr-toggle {
     width: 100%;
+    text-align: center;
   }
 
   .tribe-manager {
@@ -508,23 +952,50 @@ body {
     top: 0.5rem;
     right: 0.5rem;
   }
+
+  /* Large tappable buttons on mobile */
+  .filter-btn,
+  .era-btn {
+    min-height: 48px;
+    padding: 0.7rem 1.4rem;
+    font-size: 0.85rem;
+  }
+
+  .hype-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 1.4rem;
+  }
+
+  .btn-log,
+  .btn-primary,
+  .btn-persist {
+    min-height: 48px;
+    font-size: 0.9rem;
+  }
+
+  .countdown-unit {
+    min-width: 60px;
+  }
+
+  .twist-tracker {
+    margin: 0 1rem;
+  }
 }
 
-.adventure-history::-webkit-scrollbar,
-.vote-inputs::-webkit-scrollbar {
-  width: 6px;
-}
+@media (max-width: 480px) {
 
-.adventure-history::-webkit-scrollbar-thumb,
-.vote-inputs::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-}
+  .era-filters,
+  .tribe-filters {
+    gap: 0.4rem;
+  }
 
-.tribal-panel {
-  flex: 1;
-}
+  .countdown-timer {
+    gap: 0.4rem;
+  }
 
-.btn-primary:active {
-  transform: scale(0.98);
+  .countdown-unit {
+    min-width: 50px;
+    padding: 0.5rem;
+  }
 }
