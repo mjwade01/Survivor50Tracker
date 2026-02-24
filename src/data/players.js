@@ -20,7 +20,7 @@ export const players = [
   { id: 23, name: "Savannah Louie", from: "S49 Winner", tribe: "Cila", status: "Active", image: "/pics/Savannah.avif", advantages: [], alliances: [], wins: { reward: 0, immunity: 0 }, focalPoint: "0%", totalVotes: 0, adventures: [], originalSeason: 49, era: "New Era", daysPlayed: 26 },
 
   // KALO TRIBE (Teal)
-  { id: 6, name: "Benjamin 'Coach' Wade", from: "S18, S20, S23", tribe: "Kalo", status: "Active", image: "/pics/Coach.avif", advantages: [], alliances: [], wins: { reward: 0, immunity: 0 }, focalPoint: "15%", totalVotes: 0, adventures: [], originalSeason: 18, era: "Old School", daysPlayed: 89 },
+  { id: 6, name: "Coach", from: "S18, S20, S23", tribe: "Kalo", status: "Active", image: "/pics/Coach.avif", advantages: [], alliances: [], wins: { reward: 0, immunity: 0 }, focalPoint: "15%", totalVotes: 0, adventures: [], originalSeason: 18, era: "Old School", daysPlayed: 89 },
   { id: 11, name: "Mike White", from: "S37", tribe: "Kalo", status: "Active", image: "/pics/Mike.avif", advantages: [], alliances: [], wins: { reward: 0, immunity: 0 }, focalPoint: "15%", totalVotes: 0, adventures: [], originalSeason: 37, era: "Middle Era", daysPlayed: 39 },
   { id: 8, name: "Chrissy Hofbeck", from: "S35", tribe: "Kalo", status: "Active", image: "/pics/Chrissy.avif", advantages: [], alliances: [], wins: { reward: 0, immunity: 0 }, focalPoint: "0%", totalVotes: 0, adventures: [], originalSeason: 35, era: "Middle Era", daysPlayed: 39 },
   { id: 13, name: "Jonathan Young", from: "S42", tribe: "Kalo", status: "Active", image: "/pics/Jonathan.avif", advantages: [], alliances: [], wins: { reward: 0, immunity: 0 }, focalPoint: "0%", totalVotes: 0, adventures: [], originalSeason: 42, era: "New Era", daysPlayed: 24 },
