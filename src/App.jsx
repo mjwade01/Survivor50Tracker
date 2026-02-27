@@ -160,14 +160,96 @@ function App() {
 
   const toggleStatus = (id, e) => {
     e.stopPropagation();
-    setPlayerList(prev => prev.map(p =>
-      p.id === id ? { ...p, status: p.status === 'Active' ? 'Voted Out' : 'Active' } : p
-    ));
+    setPlayerList(prev => {
+      const player = prev.find(p => p.id === id);
+      if (!player) return prev;
+
+      let newStatus;
+      if (player.status === 'Active') newStatus = 'Voted Out';
+      else if (player.status === 'Voted Out') newStatus = 'Medically Evacuated';
+      else newStatus = 'Active';
+
+      let updatedList = [...prev];
+
+      if (newStatus === 'Voted Out' || newStatus === 'Medically Evacuated') {
+        const boomerangIdols = player.advantages.filter(a => a.type === 'Boomerang Idol');
+        if (boomerangIdols.length > 0) {
+          boomerangIdols.forEach(idol => {
+            if (idol.originalFinderId && idol.originalFinderId !== id) {
+              updatedList = updatedList.map(p => {
+                if (p.id === idol.originalFinderId) {
+                  return { ...p, advantages: [...p.advantages, idol] };
+                }
+                return p;
+              });
+            }
+          });
+
+          updatedList = updatedList.map(p => {
+            if (p.id === id) {
+              return { ...p, advantages: p.advantages.filter(a => a.type !== 'Boomerang Idol') };
+            }
+            return p;
+          });
+        }
+      }
+
+      return updatedList.map(p =>
+        p.id === id ? { ...p, status: newStatus } : p
+      );
+    });
   };
 
   const handleUpdatePlayer = (updatedPlayer) => {
     setPlayerList(prev => prev.map(p => p.id === updatedPlayer.id ? updatedPlayer : p));
     setSelectedPlayer(null);
+  };
+
+  const handleTransferAdvantage = (fromId, toId, advantageId) => {
+    setPlayerList(prev => {
+      const fromPlayer = prev.find(p => p.id === fromId);
+      if (!fromPlayer) return prev;
+      const advToTransfer = fromPlayer.advantages.find(a => a.id === advantageId);
+      if (!advToTransfer) return prev;
+
+      return prev.map(p => {
+        if (p.id === fromId) {
+          return { ...p, advantages: p.advantages.filter(a => a.id !== advantageId) };
+        }
+        if (p.id === toId) {
+          return { ...p, advantages: [...p.advantages, advToTransfer] };
+        }
+        return p;
+      });
+    });
+    setSelectedPlayer(null); // Close modal
+  };
+
+  const handleLogAdventure = (winnerId, loserId, sentBackId) => {
+    setPlayerList(prev => prev.map(p => {
+      if (p.id === winnerId) {
+        return {
+          ...p,
+          advantages: [...p.advantages, { id: Date.now(), name: "Block-a-Vote", type: "Extra Vote", status: "Active" }],
+          adventures: [{ id: Date.now(), date: new Date().toLocaleDateString(), description: "Won the adventure competition.", outcome: "Block-a-Vote" }, ...p.adventures]
+        };
+      }
+      if (p.id === loserId) {
+        return {
+          ...p,
+          advantages: [...p.advantages, { id: Date.now() + 1, name: "Lost Vote", type: "Disadvantage", status: "Active" }],
+          adventures: [{ id: Date.now() + 1, date: new Date().toLocaleDateString(), description: "Lost the adventure competition.", outcome: "Lost Vote" }, ...p.adventures]
+        };
+      }
+      if (p.id === sentBackId) {
+        return {
+          ...p,
+          adventures: [{ id: Date.now() + 2, date: new Date().toLocaleDateString(), description: "Sent back from the adventure without competing.", outcome: "None" }, ...p.adventures]
+        };
+      }
+      return p;
+    }));
+    alert("Adventure logged successfully!");
   };
 
   const logChallengeResult = (type, winnerTribe, secondTribe = null) => {
@@ -292,7 +374,7 @@ function App() {
             return (
               <div
                 key={player.id}
-                className={`player-card ${player.status === 'Voted Out' ? 'voted-out' : ''}`}
+                className={`player-card ${player.status === 'Voted Out' || player.status === 'Medically Evacuated' ? 'eliminated' : ''} ${player.status === 'Medically Evacuated' ? 'med-evac' : ''}`}
                 style={{
                   '--tribe-color': tribeColor,
                   '--focal-point': player.focalPoint || '15%',
@@ -338,7 +420,7 @@ function App() {
                   </div>
 
                   <div className="status-container">
-                    <span className={`player-status ${player.status === 'Voted Out' ? 'voted-out-tag' : ''}`}>
+                    <span className={`player-status ${player.status === 'Voted Out' || player.status === 'Medically Evacuated' ? 'voted-out-tag' : ''} ${player.status === 'Medically Evacuated' ? 'med-evac-tag' : ''}`}>
                       {player.status}
                     </span>
                     <button
@@ -346,7 +428,7 @@ function App() {
                       onClick={(e) => toggleStatus(player.id, e)}
                       title="Toggle Status"
                     >
-                      🔥
+                      {player.status === 'Active' ? '🔥' : player.status === 'Voted Out' ? '🚑' : '🔄'}
                     </button>
                   </div>
                 </div>
@@ -393,23 +475,28 @@ function App() {
         {/* Game Actions */}
         <div className="management-controls game-actions-bottom">
           <ChallengePanel tribes={tribes} onLog={logChallengeResult} history={challengeLog} />
+          <AdventurePanel players={playerList} onLogAdventure={handleLogAdventure} />
           <TribalCouncil tribes={tribes} players={playerList} onVotes={setPlayerList} />
         </div>
-      </main>
+      </main >
 
       {/* Edit Modal */}
-      {selectedPlayer && (
-        <EditPlayerModal
-          player={selectedPlayer}
-          onClose={() => setSelectedPlayer(null)}
-          onSave={handleUpdatePlayer}
-        />
-      )}
+      {
+        selectedPlayer && (
+          <EditPlayerModal
+            player={selectedPlayer}
+            players={playerList}
+            onClose={() => setSelectedPlayer(null)}
+            onSave={handleUpdatePlayer}
+            onTransfer={handleTransferAdvantage}
+          />
+        )
+      }
 
       <footer style={{ textAlign: 'center', padding: '4rem', opacity: 0.4 }}>
         Built for the Survivor 50 Anniversary • Outplay, Outwit, Outlast
       </footer>
-    </div>
+    </div >
   )
 }
 
@@ -465,6 +552,66 @@ function ChallengePanel({ tribes, onLog, history }) {
 }
 
 // ==========================================================================
+// ADVENTURE PANEL
+// ==========================================================================
+function AdventurePanel({ players, onLogAdventure }) {
+  const activePlayers = players.filter(p => p.status === 'Active');
+  const [winner, setWinner] = useState('');
+  const [loser, setLoser] = useState('');
+  const [sentBack, setSentBack] = useState('');
+
+  const handleLog = () => {
+    if (!winner && !loser && !sentBack) {
+      alert("Please select at least one player for the adventure.");
+      return;
+    }
+    const wId = winner ? parseInt(winner) : null;
+    const lId = loser ? parseInt(loser) : null;
+    const sId = sentBack ? parseInt(sentBack) : null;
+
+    if ((wId && (wId === lId || wId === sId)) || (lId && lId === sId)) {
+      alert("Players must be distinct.");
+      return;
+    }
+
+    onLogAdventure(wId, lId, sId);
+    setWinner('');
+    setLoser('');
+    setSentBack('');
+  };
+
+  return (
+    <div className="challenge-panel">
+      <h3>Record Adventure</h3>
+      <div className="challenge-controls">
+        <div className="winner-selection">
+          <label>Winner (Block-a-Vote):</label>
+          <select value={winner} onChange={e => setWinner(e.target.value)}>
+            <option value="">-- Select Winner --</option>
+            {activePlayers.map(p => <option key={p.id} value={p.id}>{p.name} ({p.tribe})</option>)}
+          </select>
+        </div>
+        <div className="second-selection">
+          <label>Loser (Lost Vote):</label>
+          <select value={loser} onChange={e => setLoser(e.target.value)}>
+            <option value="">-- Select Loser --</option>
+            {activePlayers.map(p => <option key={p.id} value={p.id}>{p.name} ({p.tribe})</option>)}
+          </select>
+        </div>
+        <div className="second-selection">
+          <label>Sent Back (No Advantage):</label>
+          <select value={sentBack} onChange={e => setSentBack(e.target.value)}>
+            <option value="">-- Select Sent Back --</option>
+            {activePlayers.map(p => <option key={p.id} value={p.id}>{p.name} ({p.tribe})</option>)}
+          </select>
+        </div>
+        <button onClick={handleLog} className="btn-log">LOG ADVENTURE</button>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================================================
 // TRIBE MANAGER
 // ==========================================================================
 function TribeManager({ tribes, onUpdate, onAdd }) {
@@ -510,7 +657,7 @@ function TribeManager({ tribes, onUpdate, onAdd }) {
 // ==========================================================================
 // EDIT PLAYER MODAL
 // ==========================================================================
-function EditPlayerModal({ player, onClose, onSave }) {
+function EditPlayerModal({ player, players, onClose, onSave, onTransfer }) {
   const [editedPlayer, setEditedPlayer] = useState({ ...player });
   const [newAdvantage, setNewAdvantage] = useState({ name: '', type: 'Idol' });
   const [newAlliance, setNewAlliance] = useState('');
@@ -551,6 +698,7 @@ function EditPlayerModal({ player, onClose, onSave }) {
       ...newAdvantage,
       id: Date.now(),
       status: 'Active',
+      originalFinderId: newAdvantage.type === 'Boomerang Idol' ? player.id : undefined,
       prerequisites: newAdvantage.type === 'Beware' ? [
         { id: 1, label: 'Find Clue', met: false },
         { id: 2, label: 'Complete Task', met: false },
@@ -693,16 +841,34 @@ function EditPlayerModal({ player, onClose, onSave }) {
               <option value="Idol">Idol</option>
               <option value="Beware">Beware Advantage</option>
               <option value="Extra Vote">Extra Vote</option>
+              <option value="Boomerang Idol">Boomerang Idol</option>
+              <option value="Disadvantage">Disadvantage</option>
             </select>
             <button onClick={addAdvantage} className="btn-primary" style={{ padding: '8px 15px' }}>+</button>
           </div>
 
           <div className="advantage-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
             {editedPlayer.advantages.map(adv => (
-              <div key={adv.id} style={{ background: 'var(--color-bg-deep)', padding: '15px', borderRadius: '8px', marginBottom: '10px', borderLeft: `4px solid ${adv.type === 'Beware' ? '#ff4500' : '#ffd700'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div key={adv.id} style={{ background: 'var(--color-bg-deep)', padding: '15px', borderRadius: '8px', marginBottom: '10px', borderLeft: `4px solid ${adv.type === 'Beware' ? '#ff4500' : adv.type === 'Disadvantage' ? '#EF4444' : '#ffd700'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <strong>{adv.name} ({adv.type})</strong>
-                  <button onClick={() => removeAdvantage(adv.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>Remove</button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value && onTransfer) {
+                          onTransfer(player.id, parseInt(e.target.value), adv.id);
+                        }
+                      }}
+                      value=""
+                      style={{ background: '#000', color: 'white', border: '1px solid #444', borderRadius: '4px', fontSize: '0.8rem', padding: '4px' }}
+                    >
+                      <option value="">Gift To...</option>
+                      {players && players.filter(p => p.id !== player.id && p.status === 'Active').map(p => (
+                        <option key={p.id} value={p.id}>{p.name} ({p.tribe})</option>
+                      ))}
+                    </select>
+                    <button onClick={() => removeAdvantage(adv.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>Remove</button>
+                  </div>
                 </div>
 
                 {adv.type === 'Beware' && (
