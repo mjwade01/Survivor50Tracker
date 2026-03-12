@@ -214,15 +214,33 @@ function App() {
 
       return prev.map(p => {
         if (p.id === fromId) {
-          return { ...p, advantages: p.advantages.filter(a => a.id !== advantageId) };
+          // Leave a "receipt" so the sender knows they gifted it
+          const receipt = {
+            id: Date.now() + Math.random(),
+            name: `Gifted to ${p.name}`, // We will replace `${p.name}` with the actual receiver's name below
+            type: 'Boomerang Receipt',
+            status: 'Active',
+            giftedToId: toId
+          };
+          return { ...p, advantages: p.advantages.map(a => a.id === advantageId ? receipt : a) };
         }
         if (p.id === toId) {
           let transferredAdv = { ...advToTransfer };
           if (advToTransfer.type === 'Boomerang Idol') {
-            // Disguise it as a normal Idol to the receiver so they don't know it's a Boomerang
-            transferredAdv.type = 'Idol';
+            // Keep it labelled as a Boomerang Idol so the GM can see it clearly
+            transferredAdv.type = 'Boomerang Idol';
           }
           return { ...p, advantages: [...p.advantages, transferredAdv] };
+        }
+        return p;
+      }).map(p => {
+        // Fix the receipt name now that we have mapped over all players
+        if (p.id === fromId) {
+            const receiver = prev.find(r => r.id === toId);
+            return {
+                ...p,
+                advantages: p.advantages.map(a => a.type === 'Boomerang Receipt' && a.giftedToId === toId ? { ...a, name: `Gifted to ${receiver ? receiver.name : 'Unknown'}` } : a)
+            }
         }
         return p;
       });
@@ -418,11 +436,9 @@ function App() {
                   {/* Advantage Icons */}
                   <div className="advantage-icons">
                     {player.advantages.map((adv, idx) => {
-                      const isBoomerangFinder = adv.type === 'Boomerang Idol' || (adv.originalFinderId && adv.originalFinderId === player.id);
-                      const displayType = isBoomerangFinder ? 'Boomerang Idol' : adv.type;
                       return (
-                      <span key={idx} className={`icon-tag ${adv.type === 'Beware' ? 'beware' : 'idol'}`}>
-                        {adv.type === 'Idol' || adv.type === 'Boomerang Idol' || (adv.originalFinderId && adv.originalFinderId !== player.id) ? '🛡️' : '⚠️'} {adv.name}
+                      <span key={idx} className={`icon-tag ${adv.type === 'Beware' ? 'beware' : adv.type === 'Boomerang Receipt' ? 'receipt' : 'idol'}`} style={adv.type === 'Boomerang Receipt' ? { borderColor: '#888', color: '#888', fontStyle: 'italic' } : {}}>
+                        {adv.type === 'Idol' || adv.type === 'Boomerang Idol' || (adv.originalFinderId && adv.originalFinderId !== player.id) ? '🛡️' : adv.type === 'Boomerang Receipt' ? '📤' : '⚠️'} {adv.name} {adv.type === 'Boomerang Idol' ? '(Boomerang)' : ''}
                       </span>
                     )})}
                     {player.alliances.length > 0 && (
@@ -911,27 +927,31 @@ function EditPlayerModal({ player, players, tribes, onClose, onSave, onTransfer 
           </div>
 
           <div className="advantage-list" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-            {editedPlayer.advantages.map(adv => (
-              <div key={adv.id} style={{ background: 'var(--color-bg-deep)', padding: '15px', borderRadius: '8px', marginBottom: '10px', borderLeft: `4px solid ${adv.type === 'Beware' ? '#ff4500' : adv.type === 'Disadvantage' ? '#EF4444' : '#ffd700'}` }}>
+            {editedPlayer.advantages.map(adv => {
+              const originalFinder = players.find(p => p.id === adv.originalFinderId);
+              return (
+              <div key={adv.id} style={{ background: 'var(--color-bg-deep)', padding: '15px', borderRadius: '8px', marginBottom: '10px', borderLeft: `4px solid ${adv.type === 'Beware' ? '#ff4500' : adv.type === 'Disadvantage' ? '#EF4444' : adv.type === 'Boomerang Receipt' ? '#888' : '#ffd700'}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <strong>
-                    {adv.name} ({adv.originalFinderId && adv.originalFinderId !== editedPlayer.id ? `Hidden Boomerang from Player ${adv.originalFinderId}` : adv.type})
+                    {adv.name} ({adv.originalFinderId && adv.originalFinderId !== editedPlayer.id ? `Boomerang from ${originalFinder ? originalFinder.name : 'Unknown'}` : adv.type})
                   </strong>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <select
-                      onChange={(e) => {
-                        if (e.target.value && onTransfer) {
-                          onTransfer(player.id, parseInt(e.target.value), adv.id);
-                        }
-                      }}
-                      value=""
-                      style={{ background: '#000', color: 'white', border: '1px solid #444', borderRadius: '4px', fontSize: '0.8rem', padding: '4px' }}
-                    >
-                      <option value="">Gift To...</option>
-                      {players && players.filter(p => p.id !== player.id && p.status === 'Active').map(p => (
-                        <option key={p.id} value={p.id}>{p.name} ({p.tribe})</option>
-                      ))}
-                    </select>
+                    {adv.type !== 'Boomerang Receipt' && (
+                        <select
+                          onChange={(e) => {
+                            if (e.target.value && onTransfer) {
+                              onTransfer(player.id, parseInt(e.target.value), adv.id);
+                            }
+                          }}
+                          value=""
+                          style={{ background: '#000', color: 'white', border: '1px solid #444', borderRadius: '4px', fontSize: '0.8rem', padding: '4px' }}
+                        >
+                          <option value="">Gift To...</option>
+                          {players && players.filter(p => p.id !== player.id && p.status === 'Active').map(p => (
+                            <option key={p.id} value={p.id}>{p.name} ({p.tribe})</option>
+                          ))}
+                        </select>
+                    )}
                     <button onClick={() => removeAdvantage(adv.id)} style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer' }}>Remove</button>
                   </div>
                 </div>
@@ -952,7 +972,8 @@ function EditPlayerModal({ player, players, tribes, onClose, onSave, onTransfer 
                   </div>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
