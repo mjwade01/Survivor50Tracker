@@ -396,6 +396,11 @@ function App() {
                   <div className="player-name">{player.name.split(' ')[0]}</div>
                   <div className="player-meta">
                     {player.tribe} Tribe • {player.from}
+                    {player.previousTribes && player.previousTribes.length > 0 && (
+                      <div style={{ fontSize: '0.75rem', opacity: 0.8, marginTop: '2px' }}>
+                        (Formerly: {player.previousTribes.join(' → ')})
+                      </div>
+                    )}
                   </div>
 
                   {/* Season & Days Played Badges */}
@@ -486,6 +491,7 @@ function App() {
           <EditPlayerModal
             player={selectedPlayer}
             players={playerList}
+            tribes={tribes}
             onClose={() => setSelectedPlayer(null)}
             onSave={handleUpdatePlayer}
             onTransfer={handleTransferAdvantage}
@@ -657,8 +663,8 @@ function TribeManager({ tribes, onUpdate, onAdd }) {
 // ==========================================================================
 // EDIT PLAYER MODAL
 // ==========================================================================
-function EditPlayerModal({ player, players, onClose, onSave, onTransfer }) {
-  const [editedPlayer, setEditedPlayer] = useState({ ...player });
+function EditPlayerModal({ player, players, tribes, onClose, onSave, onTransfer }) {
+  const [editedPlayer, setEditedPlayer] = useState({ ...player, previousTribes: player.previousTribes || [] });
   const [newAdvantage, setNewAdvantage] = useState({ name: '', type: 'Idol' });
   const [newAlliance, setNewAlliance] = useState('');
   const [newAdventure, setNewAdventure] = useState({ description: '', outcome: 'None' });
@@ -735,6 +741,55 @@ function EditPlayerModal({ player, players, onClose, onSave, onTransfer }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         <h2 style={{ color: 'var(--color-torch-amber)', marginTop: 0 }}>Edit {player.name}</h2>
+
+        <div className="form-section">
+          <label className="form-label">Tribe</label>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <select
+              value={editedPlayer.tribe}
+              onChange={(e) => {
+                const newTribe = e.target.value;
+                if (newTribe !== editedPlayer.tribe) {
+                  setEditedPlayer({
+                    ...editedPlayer,
+                    tribe: newTribe,
+                    previousTribes: [...(editedPlayer.previousTribes || []), editedPlayer.tribe]
+                  });
+                }
+              }}
+              style={{ background: 'var(--color-bg-deep)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', padding: '8px', borderRadius: '4px', flex: 1 }}
+            >
+              {tribes && tribes.map(t => (
+                <option key={t.name} value={t.name}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+          {editedPlayer.previousTribes && editedPlayer.previousTribes.length > 0 && (
+            <div style={{ marginTop: '10px', fontSize: '0.85rem', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ color: 'var(--color-text-muted)' }}>History:</span>
+              {editedPlayer.previousTribes.map((pt, idx) => (
+                <span key={idx} style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>
+                  {pt} 
+                  {idx === editedPlayer.previousTribes.length - 1 && (
+                     <button 
+                       onClick={() => {
+                         const newHistory = [...editedPlayer.previousTribes];
+                         const lastTribe = newHistory.pop();
+                         setEditedPlayer({
+                           ...editedPlayer,
+                           tribe: lastTribe,
+                           previousTribes: newHistory
+                         });
+                       }}
+                       style={{ background: 'none', border: 'none', color: '#EF4444', marginLeft: '5px', cursor: 'pointer', padding: 0 }}
+                       title="Undo swap"
+                     >↩</button>
+                  )}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="form-grid">
           <div className="form-section">
