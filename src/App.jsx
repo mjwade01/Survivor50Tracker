@@ -172,22 +172,22 @@ function App() {
       let updatedList = [...prev];
 
       if (newStatus === 'Voted Out' || newStatus === 'Medically Evacuated') {
-        const boomerangIdols = player.advantages.filter(a => a.type === 'Boomerang Idol');
-        if (boomerangIdols.length > 0) {
-          boomerangIdols.forEach(idol => {
-            if (idol.originalFinderId && idol.originalFinderId !== id) {
-              updatedList = updatedList.map(p => {
-                if (p.id === idol.originalFinderId) {
-                  return { ...p, advantages: [...p.advantages, idol] };
-                }
-                return p;
-              });
-            }
+        // Collect ALL idols that were gifted (which means they have an originalFinderId and this player isn't the finder)
+        const giftedBoomerangs = player.advantages.filter(a => a.originalFinderId && a.originalFinderId !== id);
+        if (giftedBoomerangs.length > 0) {
+          giftedBoomerangs.forEach(idol => {
+            updatedList = updatedList.map(p => {
+              if (p.id === idol.originalFinderId) {
+                // Restore its true label back to the original finder
+                return { ...p, advantages: [...p.advantages, { ...idol, type: 'Boomerang Idol' }] };
+              }
+              return p;
+            });
           });
 
           updatedList = updatedList.map(p => {
             if (p.id === id) {
-              return { ...p, advantages: p.advantages.filter(a => a.type !== 'Boomerang Idol') };
+              return { ...p, advantages: p.advantages.filter(a => !(a.originalFinderId && a.originalFinderId !== id)) };
             }
             return p;
           });
@@ -217,7 +217,12 @@ function App() {
           return { ...p, advantages: p.advantages.filter(a => a.id !== advantageId) };
         }
         if (p.id === toId) {
-          return { ...p, advantages: [...p.advantages, advToTransfer] };
+          let transferredAdv = { ...advToTransfer };
+          if (advToTransfer.type === 'Boomerang Idol') {
+            // Disguise it as a normal Idol to the receiver so they don't know it's a Boomerang
+            transferredAdv.type = 'Idol';
+          }
+          return { ...p, advantages: [...p.advantages, transferredAdv] };
         }
         return p;
       });
@@ -412,11 +417,14 @@ function App() {
 
                   {/* Advantage Icons */}
                   <div className="advantage-icons">
-                    {player.advantages.map((adv, idx) => (
+                    {player.advantages.map((adv, idx) => {
+                      const isBoomerangFinder = adv.type === 'Boomerang Idol' || (adv.originalFinderId && adv.originalFinderId === player.id);
+                      const displayType = isBoomerangFinder ? 'Boomerang Idol' : adv.type;
+                      return (
                       <span key={idx} className={`icon-tag ${adv.type === 'Beware' ? 'beware' : 'idol'}`}>
-                        {adv.type === 'Idol' ? '🛡️' : '⚠️'} {adv.name}
+                        {adv.type === 'Idol' || adv.type === 'Boomerang Idol' || (adv.originalFinderId && adv.originalFinderId !== player.id) ? '🛡️' : '⚠️'} {adv.name}
                       </span>
-                    ))}
+                    )})}
                     {player.alliances.length > 0 && (
                       <span className="icon-tag" style={{ borderColor: '#8ce', color: '#8ce' }}>
                         🤝 {player.alliances.join(', ')}
@@ -906,7 +914,9 @@ function EditPlayerModal({ player, players, tribes, onClose, onSave, onTransfer 
             {editedPlayer.advantages.map(adv => (
               <div key={adv.id} style={{ background: 'var(--color-bg-deep)', padding: '15px', borderRadius: '8px', marginBottom: '10px', borderLeft: `4px solid ${adv.type === 'Beware' ? '#ff4500' : adv.type === 'Disadvantage' ? '#EF4444' : '#ffd700'}` }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong>{adv.name} ({adv.type})</strong>
+                  <strong>
+                    {adv.name} ({adv.originalFinderId && adv.originalFinderId !== editedPlayer.id ? `Hidden Boomerang from Player ${adv.originalFinderId}` : adv.type})
+                  </strong>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <select
                       onChange={(e) => {
